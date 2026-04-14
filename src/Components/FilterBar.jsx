@@ -1,13 +1,15 @@
 import React from 'react';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { PRIORITIES, TAGS, TEAM_MEMBERS } from '../Interfaces';
+import { Search, X } from 'lucide-react';
+import { PRIORITIES, TAGS } from '../Interfaces';
+import { useTaskContext } from '../context/TaskContext';
 
 export default function FilterBar({ filters, updateFilter, resetFilters, hasActiveFilters, onAddTask }) {
+  const { members } = useTaskContext();
+
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
-      {/* Arama */}
       <div className="relative flex-1 min-w-[200px]">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(61,32,16,0.3)' }} />
         <input
           type="text"
           placeholder="Görev veya kişi ara..."
@@ -17,7 +19,6 @@ export default function FilterBar({ filters, updateFilter, resetFilters, hasActi
         />
       </div>
 
-      {/* Öncelik filtresi */}
       <select
         value={filters.priority}
         onChange={e => updateFilter('priority', e.target.value)}
@@ -29,7 +30,6 @@ export default function FilterBar({ filters, updateFilter, resetFilters, hasActi
         ))}
       </select>
 
-      {/* Etiket filtresi */}
       <select
         value={filters.tag}
         onChange={e => updateFilter('tag', e.target.value)}
@@ -41,30 +41,28 @@ export default function FilterBar({ filters, updateFilter, resetFilters, hasActi
         ))}
       </select>
 
-      {/* Kişi filtresi */}
       <select
         value={filters.assignee}
         onChange={e => updateFilter('assignee', e.target.value)}
         className="input-dark px-3 py-2 rounded-xl text-sm cursor-pointer"
       >
         <option value="all">Tüm Ekip</option>
-        {TEAM_MEMBERS.map(m => (
-          <option key={m} value={m}>{m}</option>
+        {members.map(m => (
+          <option key={m.id} value={m.name}>{m.name}</option>
         ))}
       </select>
 
-      {/* Filtreleri temizle */}
       {hasActiveFilters && (
         <button
           onClick={resetFilters}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-white/50 hover:text-white border border-white/10 hover:border-white/20 transition-all"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm border transition-all"
+          style={{ color: 'rgba(61,32,16,0.5)', borderColor: 'rgba(200,140,100,0.2)' }}
         >
           <X size={14} />
           Temizle
         </button>
       )}
 
-      {/* Görev ekle */}
       <button
         onClick={onAddTask}
         className="btn-primary flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium ml-auto"

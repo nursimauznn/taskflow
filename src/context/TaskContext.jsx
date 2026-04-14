@@ -1,129 +1,56 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import {
+  collection, addDoc, updateDoc, deleteDoc,
+  doc, onSnapshot, query, orderBy, serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '../firebase';
 
 const TaskContext = createContext(null);
 
-const STORAGE_KEY = 'taskflow_tasks';
-
-const INITIAL_TASKS = [
-  {
-    id: uuidv4(), title: 'Kullanıcı kimlik doğrulama akışı tasarla',
-    description: 'OAuth2 ve JWT token kullanarak güvenli giriş sistemi oluştur. Refresh token mekanizması dahil edilmeli.',
-    status: 'in-progress', priority: 'critical', tags: ['feature', 'design'],
-    assignee: 'Ayşe Kaya', dueDate: '2025-04-20',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-  {
-    id: uuidv4(), title: 'Dashboard bileşenlerini optimize et',
-    description: 'React.memo ve useMemo kullanarak gereksiz render\'ları azalt.',
-    status: 'review', priority: 'high', tags: ['improvement'],
-    assignee: 'Mehmet Demir', dueDate: '2025-04-18',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-  {
-    id: uuidv4(), title: 'API endpoint dokümantasyonu yaz',
-    description: 'Swagger/OpenAPI formatında tüm endpoint\'leri dokümante et.',
-    status: 'todo', priority: 'medium', tags: ['documentation'],
-    assignee: 'Zeynep Çelik', dueDate: '2025-04-25',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-  {
-    id: uuidv4(), title: 'Mobil navigasyon menüsü düzelt',
-    description: 'iOS Safari\'de hamburger menü açılmıyor. Touch event handler güncellenmeli.',
-    status: 'todo', priority: 'high', tags: ['bug'],
-    assignee: 'Ali Yıldız', dueDate: '2025-04-15',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-  {
-    id: uuidv4(), title: 'Ödeme entegrasyonu tamamla',
-    description: 'Stripe webhook\'larını test et ve production\'a al.',
-    status: 'done', priority: 'critical', tags: ['feature'],
-    assignee: 'Fatma Şahin', dueDate: '2025-04-10',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-  {
-    id: uuidv4(), title: 'E-posta bildirim sistemi kur',
-    description: 'Nodemailer ile SMTP yapılandırması ve şablonlar hazırla.',
-    status: 'in-progress', priority: 'medium', tags: ['feature'],
-    assignee: 'Emre Arslan', dueDate: '2025-04-22',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-  {
-    id: uuidv4(), title: 'Unit test coverage %80\'e çıkar',
-    description: 'Jest ve React Testing Library kullanarak kritik bileşenleri test et.',
-    status: 'todo', priority: 'low', tags: ['improvement'],
-    assignee: 'Selin Güneş', dueDate: '2025-05-01',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-  {
-    id: uuidv4(), title: 'Dark mode tema entegrasyonu',
-    description: 'CSS custom properties ile sistem teması otomatik algılama.',
-    status: 'done', priority: 'low', tags: ['design', 'improvement'],
-    assignee: 'Can Koç', dueDate: '2025-04-08',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-  },
-];
-
-function taskReducer(state, action) {
-  switch (action.type) {
-    case 'ADD_TASK':
-      return [action.payload, ...state];
-
-    case 'UPDATE_TASK':
-      return state.map(t =>
-        t.id === action.payload.id
-          ? { ...action.payload, updatedAt: new Date().toISOString() }
-          : t
-      );
-
-    case 'DELETE_TASK':
-      return state.filter(t => t.id !== action.payload);
-
-    case 'MOVE_TASK':
-      return state.map(t =>
-        t.id === action.payload.id
-          ? { ...t, status: action.payload.status, updatedAt: new Date().toISOString() }
-          : t
-      );
-
-    case 'SET_TASKS':
-      return action.payload;
-
-    default:
-      return state;
-  }
-}
-
 export function TaskProvider({ children }) {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  const initial = stored ? JSON.parse(stored) : INITIAL_TASKS;
-  const [tasks, dispatch] = useReducer(taskReducer, initial);
+  const [tasks, setTasks] = useState([]);
+  const [members, setMembers] = useState([]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }, [tasks]);
+    const q = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
+    const unsub = onSnapshot(q, (snap) => {
+      setTasks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return unsub;
+  }, []);
 
-  const addTask = (taskData) => {
-    const newTask = {
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'members'), (snap) => {
+      setMembers(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return unsub;
+  }, []);
+
+  const addTask = async (taskData) => {
+    await addDoc(collection(db, 'tasks'), {
       ...taskData,
-      id: uuidv4(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    dispatch({ type: 'ADD_TASK', payload: newTask });
-    return newTask;
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
   };
 
-  const updateTask = (task) => {
-    dispatch({ type: 'UPDATE_TASK', payload: task });
+  const updateTask = async (task) => {
+    const { id, ...data } = task;
+    await updateDoc(doc(db, 'tasks', id), {
+      ...data,
+      updatedAt: serverTimestamp(),
+    });
   };
 
-  const deleteTask = (id) => {
-    dispatch({ type: 'DELETE_TASK', payload: id });
+  const deleteTask = async (id) => {
+    await deleteDoc(doc(db, 'tasks', id));
   };
 
-  const moveTask = (id, status) => {
-    dispatch({ type: 'MOVE_TASK', payload: { id, status } });
+  const moveTask = async (id, status) => {
+    await updateDoc(doc(db, 'tasks', id), {
+      status,
+      updatedAt: serverTimestamp(),
+    });
   };
 
   const getStats = () => {
@@ -139,7 +66,7 @@ export function TaskProvider({ children }) {
   };
 
   return (
-    <TaskContext.Provider value={{ tasks, addTask, updateTask, deleteTask, moveTask, getStats }}>
+    <TaskContext.Provider value={{ tasks, members, addTask, updateTask, deleteTask, moveTask, getStats }}>
       {children}
     </TaskContext.Provider>
   );

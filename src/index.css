@@ -92,3 +92,6 @@ body {
 .text-emerald-400 { color: #2d8a5e !important; }
 .text-blue-400 { color: #2563a8 !important; }
 .text-amber-400 { color: #c07820 !important; }
+.tag-pill {
+  color: #5a3010 !important;
+}

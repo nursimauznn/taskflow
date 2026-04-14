@@ -104,21 +104,7 @@ export default function TaskCard({ task, onEdit, onDelete, onDragStart }) {
         )}
       </div>
 
-      {/* Hover aksiyon bar */}
-      <div className="flex gap-1 mt-2 -mb-1 opacity-0 group-hover:opacity-100 transition-all h-0 group-hover:h-auto overflow-hidden">
-        <button
-          onClick={() => onEdit(task)}
-          className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/8 transition-all"
-        >
-          <Edit2 size={11} /> Düzenle
-        </button>
-        <button
-          onClick={() => onDelete(task.id)}
-          className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-red-400 hover:bg-red-500/10 transition-all"
-        >
-          <Trash2 size={11} /> Sil
-        </button>
-      </div>
+      
     </div>
   );
 }

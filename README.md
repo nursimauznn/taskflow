@@ -1,16 +1,39 @@
-# React + Vite
+# TaskFlow 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React ile geliştirilmiş modern görev yönetimi uygulaması.
 
-Currently, two official plugins are available:
+## 🔗 Canlı Demo
+https://glowing-bunny-5db461.netlify.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✨ Özellikler
 
-## React Compiler
+- 📋 Kanban Board — sürükle bırak ile görev taşıma
+- 📝 Liste Görünümü — tablo halinde görev takibi
+- 📊 İstatistik Sayfası — durum/öncelik grafikleri, ekip performansı
+- 👥 Ekip Yönetimi — üye ekle/sil, görev ata
+- ✅ CRUD İşlemleri — ekle, listele, güncelle, sil
+- 🔍 Filtreleme — öncelik, etiket ve kişiye göre filtrele
+- ☁️ Firebase — gerçek zamanlı veritabanı
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Kullanılan Teknolojiler
 
-## Expanding the ESLint configuration
+- React 18
+- Vite
+- Tailwind CSS
+- Firebase (Firestore)
+- Lucide React
+- Context API
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Kurulum
+
+```bash
+npm install
+npm run dev
+```
+
+## 📸 Ekran Görüntüleri
+
+![Ana Sayfa](main.png)
+![Yeni Görev](yeni.png)
+![İstatistik](istatistik.png)
+![Ekip](ekip.png)
